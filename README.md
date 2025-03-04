@@ -71,3 +71,61 @@ print("\nTexto descomprimido:", decompressed_text)
 print(f"\nTamaño comprimido (nodos): {compressed_size} bytes")
 print(f"Tamaño descomprimido: {decompressed_size} bytes")
 ```
+prueba con 10 millones 
+```
+import sys
+import random
+import string
+
+def get_common_chars(data1, data2):
+    return set(data1) & set(data2)
+
+def compress_data(dataset):
+    nodes = []
+    order = []  # Guardará el orden de compresión
+    added = [False] * len(dataset)
+    
+    for i in range(len(dataset)):
+        if not added[i]:
+            current_node = [dataset[i]]
+            current_positions = [i]
+            added[i] = True
+            for j in range(i + 1, len(dataset)):
+                if not added[j] and get_common_chars(dataset[i], dataset[j]):
+                    current_node.append(dataset[j])
+                    current_positions.append(j)
+                    added[j] = True
+            nodes.append((current_node, current_positions))
+            order.append(len(nodes) - 1)
+    return nodes, order
+
+def decompress_data(nodes, order):
+    decompressed_data = []
+    recovered_positions = []
+    
+    for index in order:
+        node_data, node_positions = nodes[index]
+        decompressed_data.extend(node_data)
+        recovered_positions.extend(node_positions)
+    
+    sorted_pairs = sorted(zip(recovered_positions, decompressed_data))
+    return [data for _, data in sorted_pairs]
+
+def get_size_in_bytes(obj):
+    return sys.getsizeof(obj)
+
+# Generar un dataset aleatorio de 10 millones de letras
+dataset_length = 1000000
+dataset = [random.choice(string.ascii_letters) for _ in range(dataset_length)]
+
+compressed_nodes, order = compress_data(dataset)
+compressed_size = get_size_in_bytes(compressed_nodes)
+
+decompressed_data = decompress_data(compressed_nodes, order)
+decompressed_size = get_size_in_bytes(decompressed_data)
+
+# Resultados
+print(f"Tamaño del dataset original: {len(dataset)} elementos")
+print(f"Tamaño comprimido (nodos): {compressed_size} bytes")
+print(f"Tamaño descomprimido: {decompressed_size} bytes")
+```
